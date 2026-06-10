@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import 'profile_screen.dart';
+import 'course_registration_screen.dart';
+import 'results_screen.dart';
+import 'fees_screen.dart';
+import 'timetable_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // List of dashboard button features matching your UI layout
+    // All features are now connected to their real screens!
     final List<Map<String, dynamic>> features = [
       {'title': 'Student Profile', 'route': const ProfileScreen()},
-      {'title': 'Course Registration', 'route': null},
-      {'title': 'Results', 'route': null},
-      {'title': 'Fees', 'route': null},
+      {'title': 'Course Registration', 'route': const CourseRegistrationScreen()},
+      {'title': 'Results', 'route': const ResultsScreen()},
+      {'title': 'Fees', 'route': const FeesScreen()},
     ];
 
     return Scaffold(
@@ -21,7 +25,6 @@ class DashboardScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Back Button Arrow
               IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.black, size: 28),
                 padding: EdgeInsets.zero,
@@ -29,14 +32,11 @@ class DashboardScreen extends StatelessWidget {
                 onPressed: () => Navigator.pop(context),
               ),
               const SizedBox(height: 20),
-              
               const Text(
                 'DASHBOARD',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 30),
-              
-              // 2x2 Grid for top features
               GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -56,13 +56,11 @@ class DashboardScreen extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 20),
-              
-              // Center-aligned Timetables button below the grid
               Center(
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width * 0.5,
                   height: MediaQuery.of(context).size.width * 0.5 * (1 / 1.4),
-                  child: _buildDashboardCard(context, 'Timetables', null),
+                  child: _buildDashboardCard(context, 'Timetables', const TimetableScreen()),
                 ),
               ),
             ],
@@ -72,19 +70,13 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDashboardCard(BuildContext context, String title, Widget? targetScreen) {
+  Widget _buildDashboardCard(BuildContext context, String title, Widget targetScreen) {
     return InkWell(
       onTap: () {
-        if (targetScreen != null) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => targetScreen),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('$title screen connection coming soon!')),
-          );
-        }
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => targetScreen),
+        );
       },
       child: Container(
         decoration: BoxDecoration(
