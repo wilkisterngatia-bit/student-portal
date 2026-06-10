@@ -1,7 +1,52 @@
-import 'package:flutter/material.dart';
 
-class ResultsScreen extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+class ResultsScreen extends StatefulWidget {
   const ResultsScreen({super.key});
+
+  @override
+  State<ResultsScreen> createState() => _ResultsScreenState();
+}
+
+class _ResultsScreenState extends State<ResultsScreen> {
+  List<dynamic> _mockExamResults = [];
+  bool _isLoading = true;
+  String _errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchOnlineResults();
+  }
+
+  // Week 5 Concept: Asynchronous GET request handling JSON data
+  Future<void> _fetchOnlineResults() async {
+    try {
+      final url = Uri.parse('https://jsonplaceholder.typicode.com/posts?_limit=4');
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> downloadedData = json.decode(response.body);
+        
+        setState(() {
+          _mockExamResults = downloadedData;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _errorMessage = 'Server Error: ${response.statusCode}';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Network timeout or slow connection.';
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +60,7 @@ class ResultsScreen extends StatelessWidget {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40.0),
+        padding: const EdgeInsets.symmetric(horizontal: 30.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -23,27 +68,45 @@ class ResultsScreen extends StatelessWidget {
               'EXAM RESULTS',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 40),
-            const TextField(
-              decoration: InputDecoration(hintText: 'Academic Year (e.g., 2025/2026)'),
-            ),
-            const SizedBox(height: 25),
-            const TextField(
-              decoration: InputDecoration(hintText: 'Semester'),
-            ),
-            const SizedBox(height: 50),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            const SizedBox(height: 20),
+            
+            if (_isLoading)
+              const Expanded(
+                child: Center(child: CircularProgressIndicator(color: Colors.deepPurple)),
+              )
+            else if (_errorMessage.isNotEmpty)
+              Expanded(
+                child: Center(child: Text(_errorMessage, style: const TextStyle(color: Colors.red))),
+              )
+            else
+              Expanded(
+                child: ListView.separated(
+                  itemCount: _mockExamResults.length,
+                  separatorBuilder: (context, index) => const Divider(height: 30, color: Colors.black),
+                  itemBuilder: (context, index) {
+                    final item = _mockExamResults[index];
+                    String unitCode = "BIT ${4101 + index}";
+                    int mockMark = 85 - (index * 4); 
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Fixed the alignment naming here!
+                        children: [
+                          Text(
+                            unitCode,
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                          ),
+                          Text(
+                            'Grade: $mockMark% (${mockMark >= 80 ? "A" : "B"})',
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
-                child: const Text('View Transcripts', style: TextStyle(color: Colors.white, fontSize: 16)),
               ),
-            ),
           ],
         ),
       ),
