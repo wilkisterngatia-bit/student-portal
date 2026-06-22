@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
 import '../widgets/labeled_field.dart';
+<<<<<<< HEAD
 import '../services/auth_state.dart';
+=======
+>>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
 import 'dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -39,7 +42,10 @@ class _LoginScreenState extends State<LoginScreen> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('saved_username', username);
       await prefs.setBool('is_logged_in', true);
+<<<<<<< HEAD
       AuthState.isLoggedIn.value = true;
+=======
+>>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
 
       if (!mounted) return;
       Navigator.pushReplacement(

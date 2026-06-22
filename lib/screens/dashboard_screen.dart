@@ -7,7 +7,10 @@ import '../widgets/feature_card.dart';
 import '../data/timetable_data.dart';
 import '../services/attendance_api.dart';
 import '../services/student_api.dart';
+<<<<<<< HEAD
 import '../services/announcements_api.dart';
+=======
+>>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
 import 'profile_screen.dart';
 import 'course_registration_screen.dart';
 import 'results_screen.dart';
@@ -15,10 +18,14 @@ import 'fees_screen.dart';
 import 'timetable_screen.dart';
 import 'attendance_screen.dart';
 import 'exam_registration_screen.dart';
+<<<<<<< HEAD
 import 'announcements_screen.dart';
 import 'library_screen.dart';
 import 'settings_screen.dart';
 import 'search_screen.dart';
+=======
+import 'login_screen.dart';
+>>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -34,7 +41,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _balanceLoading = true;
   int? _attendancePercent;
   bool _attendanceLoading = true;
+<<<<<<< HEAD
   int _unreadAnnouncements = 0;
+=======
+>>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
 
   @override
   void initState() {
@@ -43,6 +53,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _loadProfilePhoto();
     _loadBalancePreview();
     _loadAttendancePreview();
+<<<<<<< HEAD
     _loadUnreadAnnouncements();
   }
 
@@ -59,6 +70,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     } catch (_) {
       // Stay at 0 if the fetch fails — non-critical for the dashboard.
     }
+=======
+>>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
   }
 
   Future<void> _loadUsername() async {
@@ -130,6 +143,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+<<<<<<< HEAD
   Widget _headerIconButton({
     required IconData icon,
     required VoidCallback onTap,
@@ -171,6 +185,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
       ),
+=======
+  Future<void> _handleSignOut() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('is_logged_in', false);
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+>>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
     );
   }
 
@@ -215,10 +238,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
           AppColors.violetLight, const TimetableScreen()),
       _Feature('Profile', 'Your personal details', Icons.badge_outlined,
           AppColors.violet, const ProfileScreen()),
+<<<<<<< HEAD
       _Feature('Announcements', 'School updates & news', Icons.campaign_outlined,
           AppColors.sky, const AnnouncementsScreen()),
       _Feature('Library & resources', 'Notes, papers & more', Icons.local_library_outlined,
           AppColors.rose, const LibraryScreen()),
+=======
+>>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
     ];
 
     return Scaffold(
@@ -288,6 +314,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ],
                     ),
                   ),
+<<<<<<< HEAD
                   Row(
                     children: [
                       _headerIconButton(
@@ -318,6 +345,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ),
                     ],
+=======
+                  GestureDetector(
+                    onTap: _handleSignOut,
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: AppColors.card,
+                        borderRadius: BorderRadius.circular(AppRadius.sm),
+                        border: Border.all(color: AppColors.divider),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Icon(Icons.logout, size: 20, color: AppColors.textSecondary),
+                    ),
+>>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
                   ),
                 ],
               ),

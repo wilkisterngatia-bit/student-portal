@@ -6,7 +6,10 @@ import '../widgets/screen_header.dart';
 import '../widgets/status_pill.dart';
 import '../services/attendance_api.dart';
 import '../services/virtual_session_store.dart';
+<<<<<<< HEAD
 import '../widgets/ai_insight_card.dart';
+=======
+>>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
 
 class AttendanceScreen extends StatefulWidget {
   const AttendanceScreen({super.key});
@@ -52,6 +55,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     }
   }
 
+<<<<<<< HEAD
   /// Rule-based insight derived from the units already on screen — no
   /// external AI call, just thresholds applied to data the app already
   /// has. Flags the unit with the lowest attendance if it's below the
@@ -76,6 +80,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     );
   }
 
+=======
+>>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -162,9 +168,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           ),
           const SizedBox(height: AppSpacing.lg),
 
+<<<<<<< HEAD
           _buildAttendanceInsight(record),
 
           const SizedBox(height: AppSpacing.lg),
+=======
+>>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
           Text('By unit', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: AppSpacing.md),
 

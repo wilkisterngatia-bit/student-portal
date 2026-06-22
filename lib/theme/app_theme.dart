@@ -38,12 +38,15 @@ class AppColors {
   static const Color teal = Color(0xFF2D7F8C);
   static const Color tealSoft = Color(0xFFE1F0F2);
 
+<<<<<<< HEAD
   static const Color sky = Color(0xFF3B6FA8);
   static const Color skySoft = Color(0xFFE4ECF5);
 
   static const Color rose = Color(0xFFB85C7E);
   static const Color roseSoft = Color(0xFFF6E5EC);
 
+=======
+>>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
   static const LinearGradient heroGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,

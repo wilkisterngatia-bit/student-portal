@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../widgets/screen_header.dart';
 import '../widgets/status_pill.dart';
+<<<<<<< HEAD
 import '../widgets/ai_insight_card.dart';
+=======
+>>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
 import '../services/results_api.dart';
 
 class ResultsScreen extends StatefulWidget {
@@ -93,6 +96,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
       );
     }
 
+<<<<<<< HEAD
     return Column(
       children: [
         _buildResultsInsight(),
@@ -104,6 +108,14 @@ class _ResultsScreenState extends State<ResultsScreen> {
               itemCount: _results.length,
               separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
               itemBuilder: (context, index) {
+=======
+    return RefreshIndicator(
+      onRefresh: _fetchResults,
+      child: ListView.separated(
+        itemCount: _results.length,
+        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+        itemBuilder: (context, index) {
+>>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
           final unit = _results[index];
           final kind = unit.total >= 80 ? StatusKind.positive : StatusKind.pending;
 
@@ -152,6 +164,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
               ),
             ),
           );
+<<<<<<< HEAD
               },
             ),
           ),
@@ -185,6 +198,10 @@ class _ResultsScreenState extends State<ResultsScreen> {
     return const AiInsightCard(
       tone: InsightTone.positive,
       message: 'Solid results across all your units this semester. Keep up the consistency.',
+=======
+        },
+      ),
+>>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
     );
   }
 }
