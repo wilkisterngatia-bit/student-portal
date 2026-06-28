@@ -1,6 +1,3 @@
-/// Shared class schedule data. Both the Dashboard (to surface "next
-/// class") and the Timetable screen read from this single source so
-/// they never drift out of sync with each other.
 class ClassSlot {
   final String day;
   final String time;
@@ -23,11 +20,6 @@ class TimetableData {
     ClassSlot('Friday', '10:00 – 12:00', 'BIT 4107 — Mobile App Dev (Lab)', 'Lab 3'),
   ];
 
-  /// Returns the next upcoming class following the order classes appear
-  /// in [slots], looping back to Monday's first class if today is past
-  /// the last one in the week. This is a simplified "next class" lookup
-  /// suitable for a demo dashboard — it orders by weekday only, not by
-  /// the actual current time of day.
   static ClassSlot nextClass(DateTime now) {
     const weekdayOrder = [
       'Monday',
@@ -38,7 +30,7 @@ class TimetableData {
       'Saturday',
       'Sunday'
     ];
-    final todayIndex = now.weekday - 1; // DateTime.monday == 1
+    final todayIndex = now.weekday - 1;
 
     for (int offset = 0; offset < 7; offset++) {
       final dayName = weekdayOrder[(todayIndex + offset) % 7];

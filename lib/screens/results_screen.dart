@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../widgets/screen_header.dart';
 import '../widgets/status_pill.dart';
-<<<<<<< HEAD
 import '../widgets/ai_insight_card.dart';
-=======
->>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
 import '../services/results_api.dart';
 
 class ResultsScreen extends StatefulWidget {
@@ -96,7 +93,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
       );
     }
 
-<<<<<<< HEAD
     return Column(
       children: [
         _buildResultsInsight(),
@@ -108,63 +104,54 @@ class _ResultsScreenState extends State<ResultsScreen> {
               itemCount: _results.length,
               separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
               itemBuilder: (context, index) {
-=======
-    return RefreshIndicator(
-      onRefresh: _fetchResults,
-      child: ListView.separated(
-        itemCount: _results.length,
-        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-        itemBuilder: (context, index) {
->>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
-          final unit = _results[index];
-          final kind = unit.total >= 80 ? StatusKind.positive : StatusKind.pending;
+                final unit = _results[index];
+                final kind = unit.total >= 80 ? StatusKind.positive : StatusKind.pending;
 
-          return Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              onTap: () => _showBreakdown(unit),
-              child: Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: AppColors.card,
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                  border: Border.all(color: AppColors.divider),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
+                return Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    onTap: () => _showBreakdown(unit),
+                    child: Container(
+                      padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
-                        color: AppColors.violetSoft,
-                        borderRadius: BorderRadius.circular(AppRadius.sm),
+                        color: AppColors.card,
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                        border: Border.all(color: AppColors.divider),
                       ),
-                      alignment: Alignment.center,
-                      child: Text(unit.grade,
-                          style: const TextStyle(
-                              color: AppColors.inkPlum, fontWeight: FontWeight.w700)),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
                         children: [
-                          Text(unit.unitCode, style: Theme.of(context).textTheme.titleMedium),
-                          const SizedBox(height: 2),
-                          Text('Total: ${unit.total}%', style: Theme.of(context).textTheme.bodyMedium),
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: AppColors.violetSoft,
+                              borderRadius: BorderRadius.circular(AppRadius.sm),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(unit.grade,
+                                style: const TextStyle(
+                                    color: AppColors.inkPlum, fontWeight: FontWeight.w700)),
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(unit.unitCode, style: Theme.of(context).textTheme.titleMedium),
+                                const SizedBox(height: 2),
+                                Text('Total: ${unit.total}%', style: Theme.of(context).textTheme.bodyMedium),
+                              ],
+                            ),
+                          ),
+                          StatusPill(label: unit.grade == 'A' ? 'Excellent' : 'Pass', kind: kind),
+                          const SizedBox(width: 6),
+                          const Icon(Icons.chevron_right, size: 18, color: AppColors.textMuted),
                         ],
                       ),
                     ),
-                    StatusPill(label: unit.grade == 'A' ? 'Excellent' : 'Pass', kind: kind),
-                    const SizedBox(width: 6),
-                    const Icon(Icons.chevron_right, size: 18, color: AppColors.textMuted),
-                  ],
-                ),
-              ),
-            ),
-          );
-<<<<<<< HEAD
+                  ),
+                );
               },
             ),
           ),
@@ -173,10 +160,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
     );
   }
 
-  /// Rule-based insight flagging the unit with the lowest grade, since
-  /// that's the most actionable thing a student could act on — no
-  /// external AI call, just a threshold check over results already
-  /// fetched for this screen.
   Widget _buildResultsInsight() {
     if (_results.isEmpty) return const SizedBox.shrink();
 
@@ -198,10 +181,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
     return const AiInsightCard(
       tone: InsightTone.positive,
       message: 'Solid results across all your units this semester. Keep up the consistency.',
-=======
-        },
-      ),
->>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
     );
   }
 }

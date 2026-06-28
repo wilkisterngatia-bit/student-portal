@@ -4,10 +4,7 @@ import 'package:http/http.dart' as http;
 import '../theme/app_theme.dart';
 import '../widgets/screen_header.dart';
 import '../widgets/status_pill.dart';
-<<<<<<< HEAD
 import '../widgets/ai_insight_card.dart';
-=======
->>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
 
 class FeesScreen extends StatefulWidget {
   const FeesScreen({super.key});
@@ -136,11 +133,8 @@ class _FeesScreenState extends State<FeesScreen> {
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-<<<<<<< HEAD
         _buildFeesInsight(),
         const SizedBox(height: AppSpacing.lg),
-=======
->>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
         _statRow(context, 'Total billed', _fmt(_totalBilled), Icons.receipt_long_outlined),
         const SizedBox(height: AppSpacing.sm),
         _statRow(context, 'Amount paid', _fmt(_amountPaid), Icons.check_circle_outline),
@@ -150,9 +144,6 @@ class _FeesScreenState extends State<FeesScreen> {
     );
   }
 
-<<<<<<< HEAD
-  /// Rule-based insight from the billed/paid figures already on
-  /// screen — no external AI call involved.
   Widget _buildFeesInsight() {
     if (_balance <= 0) {
       return const AiInsightCard(
@@ -174,8 +165,6 @@ class _FeesScreenState extends State<FeesScreen> {
     );
   }
 
-=======
->>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
   Widget _statRow(BuildContext context, String label, String value, IconData icon) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),

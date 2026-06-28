@@ -30,9 +30,6 @@ class SearchableDestination {
   }
 }
 
-/// Every screen reachable from search, with extra keywords so a
-/// student can find a screen by what it's *for*, not just its title —
-/// e.g. searching "retake" should surface Exam registration.
 class SearchableDestinations {
   SearchableDestinations._();
 

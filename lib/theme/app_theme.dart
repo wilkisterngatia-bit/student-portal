@@ -2,16 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 /// Design tokens for the Student Portal.
-///
-/// Palette rationale:
-/// - Ink Plum (primary): a deep, confident purple-black that reads as
-///   institutional without being cold. Used for headers and primary text.
-/// - Violet (accent): the action color — buttons, links, active states.
-/// - Linen (surface): a warm off-white background instead of clinical
-///   white, so screens feel calmer to read for long sessions (checking
-///   grades, fees, timetables).
-/// - Sage (success) / Amber (pending) / Coral (overdue): status colors
-///   for fees and results so state is readable at a glance.
 class AppColors {
   AppColors._();
 
@@ -38,15 +28,15 @@ class AppColors {
   static const Color teal = Color(0xFF2D7F8C);
   static const Color tealSoft = Color(0xFFE1F0F2);
 
-<<<<<<< HEAD
   static const Color sky = Color(0xFF3B6FA8);
   static const Color skySoft = Color(0xFFE4ECF5);
 
   static const Color rose = Color(0xFFB85C7E);
   static const Color roseSoft = Color(0xFFF6E5EC);
 
-=======
->>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
+  static const Color slate = Color(0xFF4F6470);
+  static const Color slateSoft = Color(0xFFE8ECEE);
+
   static const LinearGradient heroGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,

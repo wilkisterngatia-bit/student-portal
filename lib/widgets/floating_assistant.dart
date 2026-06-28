@@ -8,10 +8,6 @@ class _ChatMessage {
   _ChatMessage(this.text, this.isUser);
 }
 
-/// A persistent floating chat bubble, like the small assistant widget
-/// seen in the corner of websites — sits above every screen in the
-/// app (placed once at the root, not per-screen) so it's always one
-/// tap away without taking up space in any screen's own layout.
 class FloatingAssistant extends StatefulWidget {
   const FloatingAssistant({super.key});
 
@@ -90,165 +86,152 @@ class _FloatingAssistantState extends State<FloatingAssistant> {
       right: 16,
       bottom: 16 + bottomInset,
       child: Material(
-        // The MaterialApp's `builder` places this widget outside the
-        // normal Scaffold/Navigator tree, so it has no Material
-        // ancestor by default — TextField and InkWell effects inside
-        // this widget need one explicitly, or Flutter throws "No
-        // Material widget found."
         type: MaterialType.transparency,
         child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          if (_open)
-            Container(
-              width: screenSize.width > 420 ? 340 : screenSize.width - 32,
-              height: screenSize.height * 0.55,
-              margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(
-                color: AppColors.linen,
-                borderRadius: BorderRadius.circular(AppRadius.lg),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.inkPlumDark.withOpacity(0.25),
-                    blurRadius: 24,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: Column(
-                children: [
-                  // Header
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    decoration: const BoxDecoration(gradient: AppColors.heroGradient),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          alignment: Alignment.center,
-                          child: const Icon(Icons.auto_awesome, size: 16, color: Colors.white),
-                        ),
-                        const SizedBox(width: 10),
-                        const Expanded(
-                          child: Text('Portal assistant',
-                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
-                        ),
-                        GestureDetector(
-                          onTap: _toggle,
-                          child: const Icon(Icons.close, size: 18, color: Colors.white),
-                        ),
-                      ],
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            if (_open)
+              Container(
+                width: screenSize.width > 420 ? 340 : screenSize.width - 32,
+                height: screenSize.height * 0.55,
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.linen,
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.inkPlumDark.withOpacity(0.25),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
                     ),
-                  ),
-
-                  // Messages
-                  Expanded(
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.all(AppSpacing.sm + 2),
-                      itemCount: _messages.length + (_isThinking ? 1 : 0),
-                      itemBuilder: (context, index) {
-                        if (_isThinking && index == _messages.length) {
-                          return _buildBubble(_ChatMessage('', false), thinking: true);
-                        }
-                        return _buildBubble(_messages[index]);
-                      },
-                    ),
-                  ),
-
-                  if (_messages.length <= 1)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 2),
-                      child: Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
-                        children: _suggestions.map((s) {
-                          return GestureDetector(
-                            onTap: () => _send(s),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: AppColors.violetSoft,
-                                borderRadius: BorderRadius.circular(AppRadius.pill),
-                              ),
-                              child: Text(s,
-                                  style: const TextStyle(
-                                      fontSize: 11, color: AppColors.inkPlum, fontWeight: FontWeight.w600)),
+                  ],
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      decoration: const BoxDecoration(gradient: AppColors.heroGradient),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                          );
-                        }).toList(),
+                            alignment: Alignment.center,
+                            child: const Icon(Icons.auto_awesome, size: 16, color: Colors.white),
+                          ),
+                          const SizedBox(width: 10),
+                          const Expanded(
+                            child: Text('Portal assistant',
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
+                          ),
+                          GestureDetector(
+                            onTap: _toggle,
+                            child: const Icon(Icons.close, size: 18, color: Colors.white),
+                          ),
+                        ],
                       ),
                     ),
-
-                  // Input
-                  Padding(
-                    padding: const EdgeInsets.all(AppSpacing.sm + 2),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _inputController,
-                            onSubmitted: _send,
-                            style: const TextStyle(fontSize: 13),
-                            decoration: const InputDecoration(
-                              hintText: 'Ask something...',
-                              contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                              isDense: true,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        SizedBox(
-                          height: 42,
-                          width: 42,
-                          child: ElevatedButton(
-                            onPressed: () => _send(_inputController.text),
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                              minimumSize: const Size(0, 0),
-                            ),
-                            child: const Icon(Icons.arrow_upward, size: 18, color: Colors.white),
-                          ),
-                        ),
-                      ],
+                    Expanded(
+                      child: ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.all(AppSpacing.sm + 2),
+                        itemCount: _messages.length + (_isThinking ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (_isThinking && index == _messages.length) {
+                            return _buildBubble(_ChatMessage('', false), thinking: true);
+                          }
+                          return _buildBubble(_messages[index]);
+                        },
+                      ),
                     ),
-                  ),
-                ],
+                    if (_messages.length <= 1)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 2),
+                        child: Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: _suggestions.map((s) {
+                            return GestureDetector(
+                              onTap: () => _send(s),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: AppColors.violetSoft,
+                                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                                ),
+                                child: Text(s,
+                                    style: const TextStyle(
+                                        fontSize: 11, color: AppColors.inkPlum, fontWeight: FontWeight.w600)),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.all(AppSpacing.sm + 2),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _inputController,
+                              onSubmitted: _send,
+                              style: const TextStyle(fontSize: 13),
+                              decoration: const InputDecoration(
+                                hintText: 'Ask something...',
+                                contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                isDense: true,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          SizedBox(
+                            height: 42,
+                            width: 42,
+                            child: ElevatedButton(
+                              onPressed: () => _send(_inputController.text),
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(0, 0),
+                              ),
+                              child: const Icon(Icons.arrow_upward, size: 18, color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            GestureDetector(
+              onTap: _toggle,
+              child: Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  gradient: AppColors.heroGradient,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.inkPlumDark.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  _open ? Icons.close : Icons.auto_awesome,
+                  color: Colors.white,
+                  size: 24,
+                ),
               ),
             ),
-
-          // Floating bubble button
-          GestureDetector(
-            onTap: _toggle,
-            child: Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                gradient: AppColors.heroGradient,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.inkPlumDark.withOpacity(0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              alignment: Alignment.center,
-              child: Icon(
-                _open ? Icons.close : Icons.auto_awesome,
-                color: Colors.white,
-                size: 24,
-              ),
-            ),
-          ),
-        ],
+          ],
         ),
       ),
     );

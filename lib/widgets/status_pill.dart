@@ -3,9 +3,6 @@ import '../theme/app_theme.dart';
 
 enum StatusKind { positive, pending, negative, neutral }
 
-/// A small rounded label used to show state at a glance — "Cleared",
-/// "Pending", "Overdue" — so the person doesn't have to read the number
-/// to know if something needs their attention.
 class StatusPill extends StatelessWidget {
   final String label;
   final StatusKind kind;

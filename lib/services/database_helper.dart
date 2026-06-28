@@ -1,9 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
-/// Local relational storage for student records on native platforms.
-/// On web, ProfileScreen falls back to SharedPreferences since sqflite
-/// has no file system to write to in a browser.
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
   static Database? _database;

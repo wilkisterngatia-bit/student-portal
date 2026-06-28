@@ -6,10 +6,7 @@ import '../widgets/screen_header.dart';
 import '../widgets/status_pill.dart';
 import '../services/attendance_api.dart';
 import '../services/virtual_session_store.dart';
-<<<<<<< HEAD
 import '../widgets/ai_insight_card.dart';
-=======
->>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
 
 class AttendanceScreen extends StatefulWidget {
   const AttendanceScreen({super.key});
@@ -55,33 +52,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     }
   }
 
-<<<<<<< HEAD
-  /// Rule-based insight derived from the units already on screen — no
-  /// external AI call, just thresholds applied to data the app already
-  /// has. Flags the unit with the lowest attendance if it's below the
-  /// typical 75% eligibility threshold; otherwise gives positive
-  /// reinforcement.
-  Widget _buildAttendanceInsight(AttendanceRecord record) {
-    if (record.units.isEmpty) return const SizedBox.shrink();
-
-    final lowest = record.units.reduce((a, b) => a.rate < b.rate ? a : b);
-    final lowestPercent = (lowest.rate * 100).round();
-
-    if (lowestPercent < 75) {
-      return AiInsightCard(
-        tone: InsightTone.warning,
-        message:
-            'Your ${lowest.unitCode} attendance is $lowestPercent% — below the 75% typically required for exam eligibility. Consider attending upcoming sessions, including any virtual ones, to bring this up.',
-      );
-    }
-    return AiInsightCard(
-      tone: InsightTone.positive,
-      message: 'You\'re meeting the attendance requirement in all your units. Keep it up.',
-    );
-  }
-
-=======
->>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -135,7 +105,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       },
       child: ListView(
         children: [
-          // Overall summary card
           Container(
             padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
@@ -168,16 +137,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           ),
           const SizedBox(height: AppSpacing.lg),
 
-<<<<<<< HEAD
           _buildAttendanceInsight(record),
 
           const SizedBox(height: AppSpacing.lg),
-=======
->>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
           Text('By unit', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: AppSpacing.md),
 
-          // Bar chart per unit
           Container(
             padding: const EdgeInsets.fromLTRB(AppSpacing.sm, AppSpacing.lg, AppSpacing.sm, AppSpacing.sm),
             height: 220,
@@ -255,7 +220,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
           const SizedBox(height: AppSpacing.lg),
 
-          // Per-unit list with counts
           ...record.units.map((unit) {
             final percent = (unit.rate * 100).round();
             return Padding(
@@ -376,6 +340,25 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildAttendanceInsight(AttendanceRecord record) {
+    if (record.units.isEmpty) return const SizedBox.shrink();
+
+    final lowest = record.units.reduce((a, b) => a.rate < b.rate ? a : b);
+    final lowestPercent = (lowest.rate * 100).round();
+
+    if (lowestPercent < 75) {
+      return AiInsightCard(
+        tone: InsightTone.warning,
+        message:
+            'Your ${lowest.unitCode} attendance is $lowestPercent% — below the 75% typically required for exam eligibility. Consider attending upcoming sessions, including any virtual ones, to bring this up.',
+      );
+    }
+    return const AiInsightCard(
+      tone: InsightTone.positive,
+      message: 'You\'re meeting the attendance requirement in all your units. Keep it up.',
     );
   }
 }

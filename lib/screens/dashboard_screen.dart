@@ -1,16 +1,13 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
 import '../widgets/feature_card.dart';
 import '../data/timetable_data.dart';
 import '../services/attendance_api.dart';
 import '../services/student_api.dart';
-<<<<<<< HEAD
 import '../services/announcements_api.dart';
-=======
->>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
 import 'profile_screen.dart';
 import 'course_registration_screen.dart';
 import 'results_screen.dart';
@@ -18,14 +15,11 @@ import 'fees_screen.dart';
 import 'timetable_screen.dart';
 import 'attendance_screen.dart';
 import 'exam_registration_screen.dart';
-<<<<<<< HEAD
 import 'announcements_screen.dart';
 import 'library_screen.dart';
 import 'settings_screen.dart';
 import 'search_screen.dart';
-=======
-import 'login_screen.dart';
->>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
+import 'gestures_demo_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -41,10 +35,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _balanceLoading = true;
   int? _attendancePercent;
   bool _attendanceLoading = true;
-<<<<<<< HEAD
   int _unreadAnnouncements = 0;
-=======
->>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
 
   @override
   void initState() {
@@ -53,25 +44,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _loadProfilePhoto();
     _loadBalancePreview();
     _loadAttendancePreview();
-<<<<<<< HEAD
     _loadUnreadAnnouncements();
-  }
-
-  /// Counts announcements not yet marked read, for the bell badge.
-  /// Marking-as-read happens when the student actually opens the
-  /// Announcements screen, so this count persists across dashboard
-  /// visits until they do.
-  Future<void> _loadUnreadAnnouncements() async {
-    try {
-      final announcements = await AnnouncementsApi.fetchAnnouncements();
-      final readIds = await AnnouncementsApi.getReadIds();
-      final unread = announcements.where((a) => !readIds.contains(a.id)).length;
-      if (mounted) setState(() => _unreadAnnouncements = unread);
-    } catch (_) {
-      // Stay at 0 if the fetch fails — non-critical for the dashboard.
-    }
-=======
->>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
   }
 
   Future<void> _loadUsername() async {
@@ -82,10 +55,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  /// Loads the same ID photo shown on the Profile screen. If nothing
-  /// is cached yet (first run before Profile has ever been opened),
-  /// fetches the official record once and caches the photo URL so the
-  /// two screens never show different pictures.
   Future<void> _loadProfilePhoto() async {
     final prefs = await SharedPreferences.getInstance();
     final cached = prefs.getString('profile_photo_url');
@@ -101,12 +70,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       }
       if (mounted) setState(() => _photoUrl = photoUrl);
     } catch (_) {
-      // Stay with initials if the fetch fails — Profile screen will retry.
+      // Stay with initials if the fetch fails.
     }
   }
 
-  /// Quick fee balance for the summary card. Uses the same source as
-  /// the Fees screen so the two numbers always agree.
   Future<void> _loadBalancePreview() async {
     try {
       final url = Uri.parse('https://jsonplaceholder.typicode.com/users/1');
@@ -127,8 +94,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  /// Quick attendance preview for the summary card. Uses the same
-  /// source as the Attendance screen so the two numbers always agree.
   Future<void> _loadAttendancePreview() async {
     try {
       final record = await AttendanceApi.fetchAttendance();
@@ -143,7 +108,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-<<<<<<< HEAD
+  Future<void> _loadUnreadAnnouncements() async {
+    try {
+      final announcements = await AnnouncementsApi.fetchAnnouncements();
+      final readIds = await AnnouncementsApi.getReadIds();
+      final unread = announcements.where((a) => !readIds.contains(a.id)).length;
+      if (mounted) setState(() => _unreadAnnouncements = unread);
+    } catch (_) {
+      // Stay at 0.
+    }
+  }
+
   Widget _headerIconButton({
     required IconData icon,
     required VoidCallback onTap,
@@ -185,15 +160,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
       ),
-=======
-  Future<void> _handleSignOut() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('is_logged_in', false);
-    if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
->>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
     );
   }
 
@@ -238,13 +204,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           AppColors.violetLight, const TimetableScreen()),
       _Feature('Profile', 'Your personal details', Icons.badge_outlined,
           AppColors.violet, const ProfileScreen()),
-<<<<<<< HEAD
       _Feature('Announcements', 'School updates & news', Icons.campaign_outlined,
           AppColors.sky, const AnnouncementsScreen()),
       _Feature('Library & resources', 'Notes, papers & more', Icons.local_library_outlined,
           AppColors.rose, const LibraryScreen()),
-=======
->>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
+      _Feature('Gestures & input', 'Touch & keyboard demo', Icons.touch_app_outlined,
+          AppColors.slate, const GesturesDemoScreen()),
     ];
 
     return Scaffold(
@@ -254,7 +219,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Greeting row with avatar
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -314,7 +278,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ],
                     ),
                   ),
-<<<<<<< HEAD
                   Row(
                     children: [
                       _headerIconButton(
@@ -345,28 +308,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ),
                     ],
-=======
-                  GestureDetector(
-                    onTap: _handleSignOut,
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: AppColors.card,
-                        borderRadius: BorderRadius.circular(AppRadius.sm),
-                        border: Border.all(color: AppColors.divider),
-                      ),
-                      alignment: Alignment.center,
-                      child: const Icon(Icons.logout, size: 20, color: AppColors.textSecondary),
-                    ),
->>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
                   ),
                 ],
               ),
 
               const SizedBox(height: AppSpacing.lg),
 
-              // Summary hero card: next class + fee balance
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(

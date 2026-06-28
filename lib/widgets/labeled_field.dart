@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
-/// A text field with a visible label above it (rather than a hint that
-/// disappears on focus) so people always know what they're filling in,
-/// plus optional icon and obscure support for passwords.
 class LabeledField extends StatelessWidget {
   final String label;
   final TextEditingController controller;

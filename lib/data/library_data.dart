@@ -1,7 +1,7 @@
 class LibraryResource {
   final String title;
   final String unit;
-  final String type; // Notes, Past Paper, eBook, Slides
+  final String type;
   final String sizeLabel;
 
   const LibraryResource({

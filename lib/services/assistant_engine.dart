@@ -2,12 +2,6 @@ import '../data/timetable_data.dart';
 import 'attendance_api.dart';
 import 'results_api.dart';
 
-/// A rule-based "AI assistant" — no external API call, no key needed.
-/// It matches keywords in the student's question against categories
-/// the app already has real data for (fees, attendance, results,
-/// timetable, exams) and answers using that actual cached/fetched
-/// data rather than a made-up number. Anything it doesn't recognize
-/// gets a generic, honest fallback rather than a confident guess.
 class AssistantEngine {
   static Future<String> respond(String question) async {
     final q = question.toLowerCase();
@@ -42,8 +36,6 @@ class AssistantEngine {
   }
 
   static Future<String> _feesAnswer() async {
-    // Fees screen doesn't cache its numbers locally today, so give a
-    // grounded general answer rather than guessing a figure here.
     return 'You can see your exact fee balance, total billed, and payment status on the Fees screen. If your balance is high relative to what you\'ve paid, I\'d recommend clearing some before exams to avoid delays accessing your results.';
   }
 

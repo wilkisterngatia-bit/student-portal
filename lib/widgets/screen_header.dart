@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
-/// Consistent header used across every sub-screen: back arrow, an eyebrow
-/// label, and a title. Keeping this in one place means every screen's
-/// header lines up identically instead of each one reinventing padding.
 class ScreenHeader extends StatelessWidget {
   final String eyebrow;
   final String title;

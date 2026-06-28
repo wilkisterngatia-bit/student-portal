@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
 import '../widgets/labeled_field.dart';
-<<<<<<< HEAD
 import '../services/auth_state.dart';
-=======
->>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
+import '../services/auth_api.dart';
 import 'dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -36,26 +34,34 @@ class _LoginScreenState extends State<LoginScreen> {
       _loading = true;
     });
 
-    await Future.delayed(const Duration(milliseconds: 400));
-
-    if (username == 'admin' && password == 'admin123') {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('saved_username', username);
-      await prefs.setBool('is_logged_in', true);
-<<<<<<< HEAD
-      AuthState.isLoggedIn.value = true;
-=======
->>>>>>> 0bafda798c711ccdbff03b4e01897423b69b639f
+    try {
+      // Sends the login as a real HTTP POST with the password hashed
+      // before transmission — see AuthApi for the full explanation.
+      final success = await AuthApi.login(username, password);
 
       if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const DashboardScreen()),
-      );
-    } else {
+
+      if (success) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('saved_username', username);
+        await prefs.setBool('is_logged_in', true);
+        AuthState.isLoggedIn.value = true;
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const DashboardScreen()),
+        );
+      } else {
+        setState(() {
+          _loading = false;
+          _error = 'That username or password doesn\'t match our records.';
+        });
+      }
+    } catch (_) {
+      if (!mounted) return;
       setState(() {
         _loading = false;
-        _error = 'That username or password doesn\'t match our records.';
+        _error = 'Could not reach the login server. Check your connection and try again.';
       });
     }
   }

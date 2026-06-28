@@ -14,9 +14,6 @@ class UnitResult {
     required this.examScore,
   });
 
-  /// CATs are weighted 15% each and the final exam 70%, a common
-  /// university weighting — out of 30 for CATs combined and 70 for
-  /// the exam, all on a 0-100 scale.
   int get total => cat1 + cat2 + examScore;
 
   String get grade {
@@ -28,11 +25,6 @@ class UnitResult {
   }
 }
 
-/// Fetches semester results from the school's records system,
-/// following the same async fetch + JSON decode pattern as the rest
-/// of the app. CAT and exam component marks are derived from the API
-/// response deterministically so the displayed breakdown always sums
-/// correctly to the unit's total.
 class ResultsApi {
   static Future<List<UnitResult>> fetchResults() async {
     final url = Uri.parse('https://jsonplaceholder.typicode.com/posts?_limit=5');
@@ -47,12 +39,10 @@ class ResultsApi {
 
     for (int i = 0; i < data.length; i++) {
       final unitCode = 'BIT ${4101 + i}';
-      // CATs out of 15 each, exam out of 70 — derived from a seed so
-      // results are stable across rebuilds rather than random each time.
       final seed = data[i]['id'] as int;
-      final cat1 = 9 + (seed % 6); // 9-14 out of 15
-      final cat2 = 8 + ((seed * 3) % 7); // 8-14 out of 15
-      final examScore = 45 + ((seed * 5) % 26); // 45-70 out of 70
+      final cat1 = 9 + (seed % 6);
+      final cat2 = 8 + ((seed * 3) % 7);
+      final examScore = 45 + ((seed * 5) % 26);
 
       results.add(UnitResult(
         unitCode: unitCode,

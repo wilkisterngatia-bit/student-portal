@@ -13,13 +13,6 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-/// The Profile screen is read-only by design. A student's official
-/// record — name, admission number, ID photo — is set by the
-/// institution and should not be casually editable from a settings
-/// screen. The one detail that legitimately changes here, the
-/// student's currently registered course, is sourced from the Course
-/// Registration screen instead, since that's the proper place a
-/// student updates what they're enrolled in.
 class _ProfileScreenState extends State<ProfileScreen> {
   String _name = '';
   String _admissionNo = '';
@@ -45,17 +38,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final prefs = await SharedPreferences.getInstance();
       final cachedPhoto = prefs.getString('profile_photo_url');
 
-      // Official record always comes from the school server — never
-      // from a local edit, since the student cannot change it here.
       final record = await StudentApi.fetchStudentRecord();
       final photoUrl = record['photo_url'];
       if (photoUrl != null) {
         await prefs.setString('profile_photo_url', photoUrl);
       }
 
-      // The currently registered course comes from Course Registration,
-      // if the student has registered for one this semester. Falls back
-      // to the official record's default course otherwise.
       final registeredCourse = await CourseRegistrationStore.getCurrentCourse();
 
       setState(() {

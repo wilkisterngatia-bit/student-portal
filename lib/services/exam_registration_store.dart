@@ -32,10 +32,6 @@ class ExamRegistrationEntry {
   }
 }
 
-/// Local record of exam registrations the student has submitted this
-/// session. A real system would post these to the exams office server;
-/// here they're cached locally with SharedPreferences, consistent with
-/// how Profile and Virtual Sessions persist data in this app.
 class ExamRegistrationStore {
   static const _key = 'exam_registrations';
 

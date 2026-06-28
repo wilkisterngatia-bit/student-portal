@@ -26,14 +26,6 @@ class AttendanceRecord {
   double get overallRate => totalSessions == 0 ? 0 : totalAttended / totalSessions;
 }
 
-/// Reads attendance data that originates from the classroom door
-/// biometric scanners. In a real deployment, the scanners log each
-/// fingerprint match to the institution's central system, and this
-/// app only ever reads that record back via a REST endpoint — the
-/// app has no connection to the physical scanner hardware itself.
-/// Here we call a public test API and map the response onto a
-/// believable attendance log, following the same async fetch +
-/// JSON decode pattern used for Results and Fees.
 class AttendanceApi {
   static Future<AttendanceRecord> fetchAttendance() async {
     final url = Uri.parse('https://jsonplaceholder.typicode.com/users/2/posts');

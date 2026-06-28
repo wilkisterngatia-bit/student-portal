@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../widgets/screen_header.dart';
 import '../data/exam_registration_data.dart';
 import '../services/exam_registration_store.dart';
+import '../services/keyboard_input_validator.dart';
 
 class ExamRegistrationScreen extends StatefulWidget {
   const ExamRegistrationScreen({super.key});
@@ -34,14 +35,28 @@ class _ExamRegistrationScreenState extends State<ExamRegistrationScreen> {
     final info = ExamRegistrationData.infoFor(_selectedType);
     final unit = _unitController.text.trim();
 
-    if (unit.isEmpty) {
-      _showSnack('Enter the unit code you\'re registering for.');
+    // Replaces ad-hoc isEmpty checks with the dedicated
+    // KeyboardInputValidator class, demonstrating reusable,
+    // class-based input validation rather than inline conditionals
+    // duplicated across every form in the app.
+    final unitResult = KeyboardInputValidator.validateAlphanumericCode(
+      unit, fieldName: 'Unit code',
+    );
+    if (!unitResult.isValid) {
+      _showSnack(unitResult.errorMessage!);
       return;
     }
-    if (info.requiresReason && _reasonController.text.trim().isEmpty) {
-      _showSnack('A reason is required for this exam type.');
-      return;
+
+    if (info.requiresReason) {
+      final reasonResult = KeyboardInputValidator.validateMinLength(
+        _reasonController.text, 10, fieldName: 'Reason',
+      );
+      if (!reasonResult.isValid) {
+        _showSnack(reasonResult.errorMessage!);
+        return;
+      }
     }
+
     if (info.requiresEvidence && !_evidenceAttached) {
       _showSnack('Please attach supporting evidence before submitting.');
       return;

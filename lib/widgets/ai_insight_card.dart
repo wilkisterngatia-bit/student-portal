@@ -3,11 +3,6 @@ import '../theme/app_theme.dart';
 
 enum InsightTone { info, warning, positive }
 
-/// A small callout that surfaces a rule-based "AI insight" derived
-/// from data already on screen — e.g. an attendance or fees warning.
-/// Clearly labeled as AI-generated so it's honest about being a
-/// simulated assistant rather than presenting itself as fact from the
-/// school's own systems.
 class AiInsightCard extends StatelessWidget {
   final String message;
   final InsightTone tone;

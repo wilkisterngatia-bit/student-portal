@@ -1,5 +1,3 @@
-/// The four exam registration categories, each with its own rules
-/// about what the student needs to provide and whether a fee applies.
 enum ExamType { firstAttempt, special, retake, reRetake }
 
 class ExamTypeInfo {
@@ -8,7 +6,7 @@ class ExamTypeInfo {
   final String description;
   final bool requiresReason;
   final bool requiresEvidence;
-  final int feePerUnit; // KES, 0 if free
+  final int feePerUnit;
   final String? notice;
 
   const ExamTypeInfo({

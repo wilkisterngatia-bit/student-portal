@@ -30,9 +30,6 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
     });
     try {
       final announcements = await AnnouncementsApi.fetchAnnouncements();
-      // Capture read state before marking everything read, so we can
-      // still show the unread dot for this one viewing — it then
-      // clears on the next visit since these get marked read here.
       final readIds = await AnnouncementsApi.getReadIds();
       await AnnouncementsApi.markAllAsRead(announcements.map((a) => a.id).toList());
       setState(() {

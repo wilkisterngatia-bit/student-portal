@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
-/// A compact dashboard tile with a tinted background in its accent
-/// color, a small icon badge, and a chevron hint. Sized as a slim
-/// quick-access row, not a showcase block.
 class FeatureCard extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -37,16 +34,16 @@ class FeatureCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                width: 30,
-                height: 30,
+                width: 38,
+                height: 38,
                 decoration: BoxDecoration(
                   color: accent,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 alignment: Alignment.center,
-                child: Icon(icon, color: Colors.white, size: 16),
+                child: Icon(icon, color: Colors.white, size: 18),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   title,
@@ -58,7 +55,7 @@ class FeatureCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Icon(Icons.arrow_forward_ios, size: 10, color: accent),
+              Icon(Icons.arrow_forward_ios, size: 12, color: accent),
             ],
           ),
         ),

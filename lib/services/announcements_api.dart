@@ -18,11 +18,6 @@ class Announcement {
   });
 }
 
-/// Fetches announcements posted by the school — exam schedules, fee
-/// deadlines, closures — following the same async fetch + JSON decode
-/// pattern used throughout the app. Read/unread state is tracked
-/// locally via SharedPreferences so the unread badge persists between
-/// sessions until the student actually opens Announcements.
 class AnnouncementsApi {
   static const _readIdsKey = 'announcement_read_ids';
 

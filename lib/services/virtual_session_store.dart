@@ -27,11 +27,6 @@ class VirtualSessionRecord {
   }
 }
 
-/// Stores how long the student stayed in each online lesson, locally
-/// on the device via SharedPreferences. This is the app's own record
-/// of virtual attendance — separate from the school's biometric door
-/// scanner log, since virtual lessons have no physical door to scan
-/// at.
 class VirtualSessionStore {
   static const _key = 'virtual_sessions';
 
