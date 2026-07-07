@@ -20,6 +20,7 @@ import 'library_screen.dart';
 import 'settings_screen.dart';
 import 'search_screen.dart';
 import 'gestures_demo_screen.dart';
+import 'camera_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -210,6 +211,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           AppColors.rose, const LibraryScreen()),
       _Feature('Gestures & input', 'Touch & keyboard demo', Icons.touch_app_outlined,
           AppColors.slate, const GesturesDemoScreen()),
+      _Feature('Camera', 'Capture photos', Icons.camera_alt_outlined,
+          AppColors.inkPlumDark, const CameraScreen()),
     ];
 
     return Scaffold(
