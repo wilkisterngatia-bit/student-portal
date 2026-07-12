@@ -21,6 +21,7 @@ import 'settings_screen.dart';
 import 'search_screen.dart';
 import 'gestures_demo_screen.dart';
 import 'camera_screen.dart';
+import 'gps_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -213,6 +214,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           AppColors.slate, const GesturesDemoScreen()),
       _Feature('Camera', 'Capture photos', Icons.camera_alt_outlined,
           AppColors.inkPlumDark, const CameraScreen()),
+          _Feature('GPS Location', 'Current coordinates', Icons.location_on_outlined,
+    AppColors.sage, const GpsScreen()),
     ];
 
     return Scaffold(
