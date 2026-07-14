@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
 import '../widgets/feature_card.dart';
@@ -22,23 +23,28 @@ import 'search_screen.dart';
 import 'gestures_demo_screen.dart';
 import 'camera_screen.dart';
 import 'gps_screen.dart';
-
+ 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
-
+ 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
-
+ 
 class _DashboardScreenState extends State<DashboardScreen> {
   String _username = 'Student';
   String? _photoUrl;
+ 
   int? _balance;
   bool _balanceLoading = true;
+  bool _balanceError = false;
+ 
   int? _attendancePercent;
   bool _attendanceLoading = true;
+  bool _attendanceError = false;
+ 
   int _unreadAnnouncements = 0;
-
+ 
   @override
   void initState() {
     super.initState();
@@ -48,7 +54,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _loadAttendancePreview();
     _loadUnreadAnnouncements();
   }
-
+ 
   Future<void> _loadUsername() async {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getString('saved_username');
@@ -56,7 +62,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       setState(() => _username = saved[0].toUpperCase() + saved.substring(1));
     }
   }
-
+ 
   Future<void> _loadProfilePhoto() async {
     final prefs = await SharedPreferences.getInstance();
     final cached = prefs.getString('profile_photo_url');
@@ -75,8 +81,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       // Stay with initials if the fetch fails.
     }
   }
-
+ 
   Future<void> _loadBalancePreview() async {
+    if (mounted) {
+      setState(() {
+        _balanceLoading = true;
+        _balanceError = false;
+      });
+    }
     try {
       final url = Uri.parse('https://jsonplaceholder.typicode.com/users/1');
       final response = await http.get(url);
@@ -88,15 +100,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
         });
       } else {
         if (!mounted) return;
-        setState(() => _balanceLoading = false);
+        setState(() {
+          _balanceLoading = false;
+          _balanceError = true;
+        });
       }
     } catch (_) {
       if (!mounted) return;
-      setState(() => _balanceLoading = false);
+      setState(() {
+        _balanceLoading = false;
+        _balanceError = true;
+      });
     }
   }
-
+ 
   Future<void> _loadAttendancePreview() async {
+    if (mounted) {
+      setState(() {
+        _attendanceLoading = true;
+        _attendanceError = false;
+      });
+    }
     try {
       final record = await AttendanceApi.fetchAttendance();
       if (!mounted) return;
@@ -106,10 +130,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       });
     } catch (_) {
       if (!mounted) return;
-      setState(() => _attendanceLoading = false);
+      setState(() {
+        _attendanceLoading = false;
+        _attendanceError = true;
+      });
     }
   }
-
+ 
   Future<void> _loadUnreadAnnouncements() async {
     try {
       final announcements = await AnnouncementsApi.fetchAnnouncements();
@@ -120,7 +147,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
       // Stay at 0.
     }
   }
-
+ 
+  /// UX improvement #2: pull-to-refresh for the whole summary card.
+  /// Re-runs every fetch that feeds the hero card and the announcement badge.
+  Future<void> _onRefresh() async {
+    await Future.wait([
+      _loadBalancePreview(),
+      _loadAttendancePreview(),
+      _loadUnreadAnnouncements(),
+    ]);
+  }
+ 
   Widget _headerIconButton({
     required IconData icon,
     required VoidCallback onTap,
@@ -164,19 +201,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
-
+ 
   String _greeting() {
     final hour = DateTime.now().hour;
     if (hour < 12) return 'Good morning';
     if (hour < 17) return 'Good afternoon';
     return 'Good evening';
   }
-
+ 
   String _initials() {
     if (_username.isEmpty) return 'S';
     return _username[0].toUpperCase();
   }
-
+ 
   String _fmt(int amount) {
     final str = amount.toString();
     final buf = StringBuffer();
@@ -186,11 +223,59 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
     return 'KES $buf';
   }
-
+ 
+  /// UX improvement #1: shimmering skeleton placeholder shown while a
+  /// summary row is loading, instead of a small spinner.
+  Widget _skeletonBar({double width = 54, double height = 14}) {
+    return _ShimmerBox(width: width, height: height);
+  }
+ 
+  /// UX improvement #3: inline empty/error state with a retry action,
+  /// shown when a summary row failed to load instead of a bare "—".
+  Widget _retryChip(VoidCallback onRetry) {
+    return InkWell(
+      onTap: onRetry,
+      borderRadius: BorderRadius.circular(6),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.refresh, size: 14, color: Colors.white.withOpacity(0.9)),
+            const SizedBox(width: 4),
+            Text(
+              'Retry',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.9),
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+ 
+  /// Picks the right widget for a summary row: skeleton, retry chip, or value.
+  Widget _summaryValue({
+    required bool loading,
+    required bool error,
+    required String? value,
+    required VoidCallback onRetry,
+  }) {
+    if (loading) return _skeletonBar();
+    if (error || value == null) return _retryChip(onRetry);
+    return Text(
+      value,
+      style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700),
+    );
+  }
+ 
   @override
   Widget build(BuildContext context) {
     final nextClass = TimetableData.nextClass(DateTime.now());
-
+ 
     final features = <_Feature>[
       _Feature('Results', 'View your grades', Icons.bar_chart_outlined,
           AppColors.amber, const ResultsScreen()),
@@ -214,36 +299,51 @@ class _DashboardScreenState extends State<DashboardScreen> {
           AppColors.slate, const GesturesDemoScreen()),
       _Feature('Camera', 'Capture photos', Icons.camera_alt_outlined,
           AppColors.inkPlumDark, const CameraScreen()),
-          _Feature('GPS Location', 'Current coordinates', Icons.location_on_outlined,
-    AppColors.sage, const GpsScreen()),
+      _Feature('GPS Location', 'Current coordinates', Icons.location_on_outlined,
+          AppColors.sage, const GpsScreen()),
     ];
-
+ 
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            gradient: AppColors.heroGradient,
-                            shape: BoxShape.circle,
-                          ),
-                          clipBehavior: Clip.antiAlias,
-                          child: (_photoUrl != null && _photoUrl!.isNotEmpty)
-                              ? Image.network(
-                                  _photoUrl!,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => Center(
+        child: RefreshIndicator(
+          onRefresh: _onRefresh,
+          color: AppColors.inkPlum,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              gradient: AppColors.heroGradient,
+                              shape: BoxShape.circle,
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: (_photoUrl != null && _photoUrl!.isNotEmpty)
+                                ? Image.network(
+                                    _photoUrl!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) => Center(
+                                      child: Text(
+                                        _initials(),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 18,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                : Center(
                                     child: Text(
                                       _initials(),
                                       style: const TextStyle(
@@ -253,204 +353,174 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       ),
                                     ),
                                   ),
-                                )
-                              : Center(
-                                  child: Text(
-                                    _initials(),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 18,
-                                    ),
-                                  ),
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(_greeting(), style: Theme.of(context).textTheme.labelSmall),
+                                const SizedBox(height: 2),
+                                Text(
+                                  _username,
+                                  style: Theme.of(context).textTheme.headlineSmall,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        _headerIconButton(
+                          icon: Icons.search,
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const SearchScreen()),
+                          ),
                         ),
-                        const SizedBox(width: AppSpacing.sm),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(_greeting(), style: Theme.of(context).textTheme.labelSmall),
-                              const SizedBox(height: 2),
-                              Text(
-                                _username,
-                                style: Theme.of(context).textTheme.headlineSmall,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
+                        const SizedBox(width: 8),
+                        _headerIconButton(
+                          icon: Icons.notifications_none,
+                          badgeCount: _unreadAnnouncements,
+                          onTap: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const AnnouncementsScreen()),
+                            );
+                            _loadUnreadAnnouncements();
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                        _headerIconButton(
+                          icon: Icons.settings_outlined,
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const SettingsScreen()),
                           ),
                         ),
                       ],
                     ),
+                  ],
+                ),
+ 
+                const SizedBox(height: AppSpacing.lg),
+ 
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    gradient: AppColors.heroGradient,
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
                   ),
-                  Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _headerIconButton(
-                        icon: Icons.search,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const SearchScreen()),
-                        ),
+                      Row(
+                        children: [
+                          Icon(Icons.access_time_filled,
+                              size: 16, color: Colors.white.withOpacity(0.75)),
+                          const SizedBox(width: 6),
+                          Text('Next class',
+                              style: TextStyle(
+                                  color: Colors.white.withOpacity(0.75), fontSize: 12)),
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                      _headerIconButton(
-                        icon: Icons.notifications_none,
-                        badgeCount: _unreadAnnouncements,
-                        onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => const AnnouncementsScreen()),
-                          );
-                          _loadUnreadAnnouncements();
-                        },
+                      const SizedBox(height: 6),
+                      Text(
+                        nextClass.unit,
+                        style: const TextStyle(
+                            color: Colors.white, fontSize: 17, fontWeight: FontWeight.w600),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(width: 8),
-                      _headerIconButton(
-                        icon: Icons.settings_outlined,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const SettingsScreen()),
-                        ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${nextClass.day} · ${nextClass.time} · ${nextClass.room}',
+                        style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 13),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Container(height: 1, color: Colors.white.withOpacity(0.15)),
+                      const SizedBox(height: AppSpacing.md),
+                      Row(
+                        children: [
+                          Icon(Icons.fingerprint,
+                              size: 16, color: Colors.white.withOpacity(0.75)),
+                          const SizedBox(width: 6),
+                          Text('Attendance',
+                              style: TextStyle(
+                                  color: Colors.white.withOpacity(0.75), fontSize: 12)),
+                          const Spacer(),
+                          _summaryValue(
+                            loading: _attendanceLoading,
+                            error: _attendanceError,
+                            value: _attendancePercent != null ? '$_attendancePercent%' : null,
+                            onRetry: _loadAttendancePreview,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Container(height: 1, color: Colors.white.withOpacity(0.15)),
+                      const SizedBox(height: AppSpacing.md),
+                      Row(
+                        children: [
+                          Icon(Icons.account_balance_wallet_outlined,
+                              size: 16, color: Colors.white.withOpacity(0.75)),
+                          const SizedBox(width: 6),
+                          Text('Fee balance',
+                              style: TextStyle(
+                                  color: Colors.white.withOpacity(0.75), fontSize: 12)),
+                          const Spacer(),
+                          _summaryValue(
+                            loading: _balanceLoading,
+                            error: _balanceError,
+                            value: _balance != null ? _fmt(_balance!) : null,
+                            onRetry: _loadBalancePreview,
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
-
-              const SizedBox(height: AppSpacing.lg),
-
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  gradient: AppColors.heroGradient,
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.access_time_filled,
-                            size: 16, color: Colors.white.withOpacity(0.75)),
-                        const SizedBox(width: 6),
-                        Text('Next class',
-                            style: TextStyle(
-                                color: Colors.white.withOpacity(0.75), fontSize: 12)),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      nextClass.unit,
-                      style: const TextStyle(
-                          color: Colors.white, fontSize: 17, fontWeight: FontWeight.w600),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${nextClass.day} · ${nextClass.time} · ${nextClass.room}',
-                      style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 13),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Container(height: 1, color: Colors.white.withOpacity(0.15)),
-                    const SizedBox(height: AppSpacing.md),
-                    Row(
-                      children: [
-                        Icon(Icons.fingerprint,
-                            size: 16, color: Colors.white.withOpacity(0.75)),
-                        const SizedBox(width: 6),
-                        Text('Attendance',
-                            style: TextStyle(
-                                color: Colors.white.withOpacity(0.75), fontSize: 12)),
-                        const Spacer(),
-                        _attendanceLoading
-                            ? const SizedBox(
-                                width: 14,
-                                height: 14,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : Text(
-                                _attendancePercent != null ? '$_attendancePercent%' : '—',
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w700),
-                              ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Container(height: 1, color: Colors.white.withOpacity(0.15)),
-                    const SizedBox(height: AppSpacing.md),
-                    Row(
-                      children: [
-                        Icon(Icons.account_balance_wallet_outlined,
-                            size: 16, color: Colors.white.withOpacity(0.75)),
-                        const SizedBox(width: 6),
-                        Text('Fee balance',
-                            style: TextStyle(
-                                color: Colors.white.withOpacity(0.75), fontSize: 12)),
-                        const Spacer(),
-                        _balanceLoading
-                            ? const SizedBox(
-                                width: 14,
-                                height: 14,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : Text(
-                                _balance != null ? _fmt(_balance!) : '—',
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w700),
-                              ),
-                      ],
-                    ),
-                  ],
+ 
+                const SizedBox(height: AppSpacing.xl),
+                Text('Quick access', style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: AppSpacing.md),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: AppSpacing.sm,
+                    mainAxisSpacing: AppSpacing.sm,
+                    childAspectRatio: 2.3,
+                  ),
+                  itemCount: features.length,
+                  itemBuilder: (context, index) {
+                    final f = features[index];
+                    return FeatureCard(
+                      title: f.title,
+                      subtitle: f.subtitle,
+                      icon: f.icon,
+                      accent: f.accent,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => f.screen),
+                      ),
+                    );
+                  },
                 ),
-              ),
-
-              const SizedBox(height: AppSpacing.xl),
-              Text('Quick access', style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: AppSpacing.md),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: AppSpacing.sm,
-                  mainAxisSpacing: AppSpacing.sm,
-                  childAspectRatio: 2.3,
-                ),
-                itemCount: features.length,
-                itemBuilder: (context, index) {
-                  final f = features[index];
-                  return FeatureCard(
-                    title: f.title,
-                    subtitle: f.subtitle,
-                    icon: f.icon,
-                    accent: f.accent,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => f.screen),
-                    ),
-                  );
-                },
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
-
+ 
 class _Feature {
   final String title;
   final String subtitle;
@@ -458,4 +528,58 @@ class _Feature {
   final Color accent;
   final Widget screen;
   _Feature(this.title, this.subtitle, this.icon, this.accent, this.screen);
+}
+ 
+/// Simple shimmering placeholder box — no extra package required.
+/// Pulses opacity between 0.35 and 0.85 on a loop while data is loading.
+class _ShimmerBox extends StatefulWidget {
+  final double width;
+  final double height;
+  const _ShimmerBox({required this.width, required this.height});
+ 
+  @override
+  State<_ShimmerBox> createState() => _ShimmerBoxState();
+}
+ 
+class _ShimmerBoxState extends State<_ShimmerBox> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _opacity;
+ 
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat(reverse: true);
+    _opacity = Tween<double>(begin: 0.35, end: 0.85).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+ 
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+ 
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _opacity,
+      builder: (context, child) {
+        return Opacity(
+          opacity: _opacity.value,
+          child: Container(
+            width: widget.width,
+            height: widget.height,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        );
+      },
+    );
+  }
 }

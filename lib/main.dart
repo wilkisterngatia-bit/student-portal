@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'theme/app_theme.dart';
-import 'screens/login_screen.dart';
+import 'screens/splash_screen.dart';
 import 'widgets/floating_assistant.dart';
 import 'services/auth_state.dart';
 
@@ -17,7 +17,7 @@ class StudentPortalApp extends StatelessWidget {
       title: 'Student Portal',
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
-      home: const LoginScreen(),
+      home: const SplashScreen(),
       builder: (context, child) {
         return Stack(
           children: [
