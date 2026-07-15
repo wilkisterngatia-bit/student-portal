@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
@@ -20,31 +19,28 @@ import 'announcements_screen.dart';
 import 'library_screen.dart';
 import 'settings_screen.dart';
 import 'search_screen.dart';
-import 'gestures_demo_screen.dart';
-import 'camera_screen.dart';
-import 'gps_screen.dart';
- 
+
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
- 
+
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
- 
+
 class _DashboardScreenState extends State<DashboardScreen> {
   String _username = 'Student';
   String? _photoUrl;
- 
+
   int? _balance;
   bool _balanceLoading = true;
   bool _balanceError = false;
- 
+
   int? _attendancePercent;
   bool _attendanceLoading = true;
   bool _attendanceError = false;
- 
+
   int _unreadAnnouncements = 0;
- 
+
   @override
   void initState() {
     super.initState();
@@ -54,7 +50,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _loadAttendancePreview();
     _loadUnreadAnnouncements();
   }
- 
+
   Future<void> _loadUsername() async {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getString('saved_username');
@@ -62,7 +58,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       setState(() => _username = saved[0].toUpperCase() + saved.substring(1));
     }
   }
- 
+
   Future<void> _loadProfilePhoto() async {
     final prefs = await SharedPreferences.getInstance();
     final cached = prefs.getString('profile_photo_url');
@@ -81,7 +77,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       // Stay with initials if the fetch fails.
     }
   }
- 
+
   Future<void> _loadBalancePreview() async {
     if (mounted) {
       setState(() {
@@ -113,7 +109,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       });
     }
   }
- 
+
   Future<void> _loadAttendancePreview() async {
     if (mounted) {
       setState(() {
@@ -136,7 +132,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       });
     }
   }
- 
+
   Future<void> _loadUnreadAnnouncements() async {
     try {
       final announcements = await AnnouncementsApi.fetchAnnouncements();
@@ -147,7 +143,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       // Stay at 0.
     }
   }
- 
+
   /// UX improvement #2: pull-to-refresh for the whole summary card.
   /// Re-runs every fetch that feeds the hero card and the announcement badge.
   Future<void> _onRefresh() async {
@@ -157,7 +153,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       _loadUnreadAnnouncements(),
     ]);
   }
- 
+
   Widget _headerIconButton({
     required IconData icon,
     required VoidCallback onTap,
@@ -201,19 +197,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
- 
+
   String _greeting() {
     final hour = DateTime.now().hour;
     if (hour < 12) return 'Good morning';
     if (hour < 17) return 'Good afternoon';
     return 'Good evening';
   }
- 
+
   String _initials() {
     if (_username.isEmpty) return 'S';
     return _username[0].toUpperCase();
   }
- 
+
   String _fmt(int amount) {
     final str = amount.toString();
     final buf = StringBuffer();
@@ -223,13 +219,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
     return 'KES $buf';
   }
- 
+
   /// UX improvement #1: shimmering skeleton placeholder shown while a
   /// summary row is loading, instead of a small spinner.
   Widget _skeletonBar({double width = 54, double height = 14}) {
     return _ShimmerBox(width: width, height: height);
   }
- 
+
   /// UX improvement #3: inline empty/error state with a retry action,
   /// shown when a summary row failed to load instead of a bare "—".
   Widget _retryChip(VoidCallback onRetry) {
@@ -241,12 +237,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.refresh, size: 14, color: Colors.white.withOpacity(0.9)),
+            Icon(Icons.refresh, size: 14, color: Colors.white.withValues(alpha: 0.9)),
             const SizedBox(width: 4),
             Text(
               'Retry',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
@@ -256,7 +252,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
- 
+
   /// Picks the right widget for a summary row: skeleton, retry chip, or value.
   Widget _summaryValue({
     required bool loading,
@@ -271,11 +267,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
       style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700),
     );
   }
- 
+
   @override
   Widget build(BuildContext context) {
     final nextClass = TimetableData.nextClass(DateTime.now());
- 
+
+    // GPS tile removed — location is now captured silently at login
+    // (see LocationService) instead of living on its own dashboard
+    // tile, same reasoning as moving Camera into the class check-in
+    // flow: these are device capabilities used inside real
+    // workflows, not standalone demo screens.
     final features = <_Feature>[
       _Feature('Results', 'View your grades', Icons.bar_chart_outlined,
           AppColors.amber, const ResultsScreen()),
@@ -295,14 +296,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
           AppColors.sky, const AnnouncementsScreen()),
       _Feature('Library & resources', 'Notes, papers & more', Icons.local_library_outlined,
           AppColors.rose, const LibraryScreen()),
-      _Feature('Gestures & input', 'Touch & keyboard demo', Icons.touch_app_outlined,
-          AppColors.slate, const GesturesDemoScreen()),
-      _Feature('Camera', 'Capture photos', Icons.camera_alt_outlined,
-          AppColors.inkPlumDark, const CameraScreen()),
-      _Feature('GPS Location', 'Current coordinates', Icons.location_on_outlined,
-          AppColors.sage, const GpsScreen()),
     ];
- 
+
+    // Performance: decode the avatar at its actual on-screen pixel
+    // size (48 logical px * devicePixelRatio) instead of whatever
+    // resolution the source photo happens to be. Without this, a
+    // typical 3000x4000 phone photo gets fully decoded into memory
+    // just to be shrunk down to a 48px circle.
+    final avatarCachePx = (48 * MediaQuery.of(context).devicePixelRatio).round();
+
     return Scaffold(
       body: SafeArea(
         child: RefreshIndicator(
@@ -323,7 +325,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           Container(
                             width: 48,
                             height: 48,
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               gradient: AppColors.heroGradient,
                               shape: BoxShape.circle,
                             ),
@@ -332,6 +334,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ? Image.network(
                                     _photoUrl!,
                                     fit: BoxFit.cover,
+                                    cacheWidth: avatarCachePx,
+                                    cacheHeight: avatarCachePx,
                                     errorBuilder: (context, error, stackTrace) => Center(
                                       child: Text(
                                         _initials(),
@@ -406,9 +410,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ],
                 ),
- 
+
                 const SizedBox(height: AppSpacing.lg),
- 
+
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
@@ -421,11 +425,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Row(
                         children: [
                           Icon(Icons.access_time_filled,
-                              size: 16, color: Colors.white.withOpacity(0.75)),
+                              size: 16, color: Colors.white.withValues(alpha: 0.75)),
                           const SizedBox(width: 6),
                           Text('Next class',
                               style: TextStyle(
-                                  color: Colors.white.withOpacity(0.75), fontSize: 12)),
+                                  color: Colors.white.withValues(alpha: 0.75), fontSize: 12)),
                         ],
                       ),
                       const SizedBox(height: 6),
@@ -439,19 +443,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       const SizedBox(height: 2),
                       Text(
                         '${nextClass.day} · ${nextClass.time} · ${nextClass.room}',
-                        style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 13),
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13),
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      Container(height: 1, color: Colors.white.withOpacity(0.15)),
+                      Container(height: 1, color: Colors.white.withValues(alpha: 0.15)),
                       const SizedBox(height: AppSpacing.md),
                       Row(
                         children: [
                           Icon(Icons.fingerprint,
-                              size: 16, color: Colors.white.withOpacity(0.75)),
+                              size: 16, color: Colors.white.withValues(alpha: 0.75)),
                           const SizedBox(width: 6),
                           Text('Attendance',
                               style: TextStyle(
-                                  color: Colors.white.withOpacity(0.75), fontSize: 12)),
+                                  color: Colors.white.withValues(alpha: 0.75), fontSize: 12)),
                           const Spacer(),
                           _summaryValue(
                             loading: _attendanceLoading,
@@ -462,16 +466,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ],
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      Container(height: 1, color: Colors.white.withOpacity(0.15)),
+                      Container(height: 1, color: Colors.white.withValues(alpha: 0.15)),
                       const SizedBox(height: AppSpacing.md),
                       Row(
                         children: [
                           Icon(Icons.account_balance_wallet_outlined,
-                              size: 16, color: Colors.white.withOpacity(0.75)),
+                              size: 16, color: Colors.white.withValues(alpha: 0.75)),
                           const SizedBox(width: 6),
                           Text('Fee balance',
                               style: TextStyle(
-                                  color: Colors.white.withOpacity(0.75), fontSize: 12)),
+                                  color: Colors.white.withValues(alpha: 0.75), fontSize: 12)),
                           const Spacer(),
                           _summaryValue(
                             loading: _balanceLoading,
@@ -484,7 +488,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ],
                   ),
                 ),
- 
+
                 const SizedBox(height: AppSpacing.xl),
                 Text('Quick access', style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: AppSpacing.md),
@@ -520,7 +524,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 }
- 
+
 class _Feature {
   final String title;
   final String subtitle;
@@ -529,22 +533,22 @@ class _Feature {
   final Widget screen;
   _Feature(this.title, this.subtitle, this.icon, this.accent, this.screen);
 }
- 
+
 /// Simple shimmering placeholder box — no extra package required.
 /// Pulses opacity between 0.35 and 0.85 on a loop while data is loading.
 class _ShimmerBox extends StatefulWidget {
   final double width;
   final double height;
   const _ShimmerBox({required this.width, required this.height});
- 
+
   @override
   State<_ShimmerBox> createState() => _ShimmerBoxState();
 }
- 
+
 class _ShimmerBoxState extends State<_ShimmerBox> with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _opacity;
- 
+
   @override
   void initState() {
     super.initState();
@@ -556,13 +560,13 @@ class _ShimmerBoxState extends State<_ShimmerBox> with SingleTickerProviderState
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
- 
+
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
- 
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../widgets/screen_header.dart';
 import '../data/timetable_data.dart';
-import 'live_session_screen.dart';
+import 'check_in_screen.dart';
 
 class TimetableScreen extends StatelessWidget {
   const TimetableScreen({super.key});
@@ -104,7 +104,7 @@ class _DaySection extends StatelessWidget {
                           onPressed: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => LiveSessionScreen(
+                              builder: (_) => CheckInScreen(
                                 unit: slot.unit,
                                 day: slot.day,
                                 time: slot.time,

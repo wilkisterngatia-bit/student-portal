@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../theme/app_theme.dart';
 import '../widgets/screen_header.dart';
 import '../services/announcements_api.dart';
+import '../services/gesture_handler_service.dart';
 
 class AnnouncementsScreen extends StatefulWidget {
   const AnnouncementsScreen({super.key});
@@ -12,8 +15,11 @@ class AnnouncementsScreen extends StatefulWidget {
 }
 
 class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
+  static const _dismissedKey = 'dismissed_announcement_ids';
+
   List<Announcement> _announcements = [];
   Set<String> _readIds = {};
+  Set<String> _dismissedIds = {};
   bool _isLoading = true;
   String _errorMessage = '';
 
@@ -32,9 +38,17 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
       final announcements = await AnnouncementsApi.fetchAnnouncements();
       final readIds = await AnnouncementsApi.getReadIds();
       await AnnouncementsApi.markAllAsRead(announcements.map((a) => a.id).toList());
+
+      final prefs = await SharedPreferences.getInstance();
+      final rawDismissed = prefs.getString(_dismissedKey);
+      final dismissedIds = rawDismissed != null
+          ? Set<String>.from(json.decode(rawDismissed) as List)
+          : <String>{};
+
       setState(() {
         _announcements = announcements;
         _readIds = readIds;
+        _dismissedIds = dismissedIds;
         _isLoading = false;
       });
     } catch (_) {
@@ -43,6 +57,39 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  /// Persists the dismissed-announcement set. This is deliberately
+  /// kept local to this screen (SharedPreferences, not a server call)
+  /// since "dismiss from my list" is a per-device UI preference, not
+  /// data the school's records need to know about.
+  Future<void> _saveDismissed() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_dismissedKey, json.encode(_dismissedIds.toList()));
+  }
+
+  /// Swipe-left-to-dismiss, using the real GestureHandlerService from
+  /// Week 8 rather than Flutter's built-in Dismissible — this is the
+  /// gesture-handling class doing actual work in the app, instead of
+  /// living only on its own demo tab. Includes an Undo action since a
+  /// swipe-based destructive action needs an easy way back.
+  void _dismiss(Announcement a) {
+    setState(() => _dismissedIds.add(a.id));
+    _saveDismissed();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Dismissed "${a.title}"'),
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () {
+            setState(() => _dismissedIds.remove(a.id));
+            _saveDismissed();
+          },
+        ),
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   Color _categoryColor(String category) {
@@ -70,7 +117,12 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const ScreenHeader(eyebrow: 'UPDATES', title: 'Announcements'),
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: 4),
+              Text(
+                'Swipe left on an announcement to dismiss it from your list.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11.5),
+              ),
+              const SizedBox(height: AppSpacing.md),
               Expanded(child: _buildBody(context)),
             ],
           ),
@@ -98,14 +150,20 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
         ),
       );
     }
-    if (_announcements.isEmpty) {
+
+    final visible = _announcements.where((a) => !_dismissedIds.contains(a.id)).toList();
+
+    if (visible.isEmpty) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.notifications_none, size: 36, color: AppColors.textMuted),
             const SizedBox(height: AppSpacing.sm),
-            Text('No announcements yet', style: Theme.of(context).textTheme.bodyMedium),
+            Text(
+              _announcements.isEmpty ? 'No announcements yet' : 'All caught up — nothing left to show',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           ],
         ),
       );
@@ -114,20 +172,20 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
     return RefreshIndicator(
       onRefresh: _load,
       child: ListView.separated(
-        itemCount: _announcements.length,
+        itemCount: visible.length,
         separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
         itemBuilder: (context, index) {
-          final a = _announcements[index];
+          final a = visible[index];
           final wasUnread = !_readIds.contains(a.id);
           final color = _categoryColor(a.category);
 
-          return Container(
+          final card = Container(
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
               color: AppColors.card,
               borderRadius: BorderRadius.circular(AppRadius.md),
               border: Border.all(
-                color: wasUnread ? color.withOpacity(0.4) : AppColors.divider,
+                color: wasUnread ? color.withValues(alpha: 0.4) : AppColors.divider,
                 width: wasUnread ? 1.4 : 1,
               ),
             ),
@@ -139,7 +197,7 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: color.withOpacity(0.12),
+                        color: color.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(AppRadius.pill),
                       ),
                       child: Text(a.category,
@@ -167,6 +225,19 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
               ],
             ),
           );
+
+          // Real usage of GestureHandlerService (Week 8): swipe-left
+          // on a card dismisses it. Tap/double-tap/long-press are
+          // also live on this same wrapped widget, even though this
+          // screen only acts on the swipe — the service still
+          // recognizes all of them uniformly.
+          return GestureHandlerService(
+            onGesture: (event) {
+              if (event.type == GestureType.swipeLeft) {
+                _dismiss(a);
+              }
+            },
+          ).wrap(child: card);
         },
       ),
     );

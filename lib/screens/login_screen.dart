@@ -4,7 +4,9 @@ import '../theme/app_theme.dart';
 import '../widgets/labeled_field.dart';
 import '../services/auth_state.dart';
 import '../services/auth_api.dart';
+import '../services/location_service.dart';
 import 'dashboard_screen.dart';
+import 'registration_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -45,7 +47,18 @@ class _LoginScreenState extends State<LoginScreen> {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('saved_username', username);
         await prefs.setBool('is_logged_in', true);
-        AuthState.isLoggedIn.value = true;
+
+        // Another async gap happened above (SharedPreferences calls),
+        // so re-check mounted right before touching context/Navigator —
+        // the earlier check only covers the AuthApi.login gap.
+        if (!mounted) return;
+
+        AuthState.login();
+
+        // Fire-and-forget: captures GPS location in the background as
+        // login evidence. Deliberately not awaited — a slow or denied
+        // location fetch should never delay getting into the app.
+        LocationService.captureLoginLocation();
 
         Navigator.pushReplacement(
           context,
@@ -103,7 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: 64,
                         height: 64,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.12),
+                          color: Colors.white.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(18),
                         ),
                         alignment: Alignment.center,
@@ -123,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         'Sign in to view your courses, results, and fees',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.white.withOpacity(0.78),
+                              color: Colors.white.withValues(alpha: 0.78),
                             ),
                       ),
                     ],
@@ -190,6 +203,18 @@ class _LoginScreenState extends State<LoginScreen> {
                             : const Text('Sign in'),
                       ),
                       const SizedBox(height: AppSpacing.lg),
+                      Center(
+                        child: TextButton(
+                          onPressed: _loading
+                              ? null
+                              : () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (_) => const RegistrationScreen()),
+                                  ),
+                          child: const Text("Don't have an account? Register"),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
                       Center(
                         child: Text(
                           'Demo access — username: admin · password: admin123',

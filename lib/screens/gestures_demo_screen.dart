@@ -139,7 +139,7 @@ class _GesturesDemoScreenState extends State<GesturesDemoScreen> {
                     const SizedBox(height: 8),
                     Text(
                       'Try any gesture here',
-                      style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 13),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 13),
                     ),
                   ],
                 ),
@@ -183,7 +183,7 @@ class _GesturesDemoScreenState extends State<GesturesDemoScreen> {
                           width: 32,
                           height: 32,
                           decoration: BoxDecoration(
-                            color: color.withOpacity(0.12),
+                            color: color.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           alignment: Alignment.center,

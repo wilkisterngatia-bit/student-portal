@@ -4,6 +4,7 @@ import '../widgets/screen_header.dart';
 import '../widgets/status_pill.dart';
 import '../services/student_api.dart';
 import '../services/course_registration_store.dart';
+import '../services/location_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -19,6 +20,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _course = '';
   String? _photoUrl;
 
+  Map<String, dynamic>? _lastLoginLocation;
+
   bool _isLoading = true;
   String _errorMessage = '';
 
@@ -26,6 +29,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _loadProfile();
+    _loadLastLoginLocation();
   }
 
   Future<void> _loadProfile() async {
@@ -59,6 +63,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  /// Reads back whatever location LoginScreen captured silently in
+  /// the background — this screen doesn't request location itself,
+  /// it just displays the most recent capture, if one exists.
+  Future<void> _loadLastLoginLocation() async {
+    final location = await LocationService.getLastLoginLocation();
+    if (mounted) setState(() => _lastLoginLocation = location);
+  }
+
+  String _formatLastLogin() {
+    if (_lastLoginLocation == null) return 'Not available on this device yet';
+    final lat = (_lastLoginLocation!['latitude'] as num).toStringAsFixed(3);
+    final lng = (_lastLoginLocation!['longitude'] as num).toStringAsFixed(3);
+    final capturedAt = DateTime.tryParse(_lastLoginLocation!['capturedAt'] as String);
+    final timeText = capturedAt != null
+        ? '${capturedAt.hour.toString().padLeft(2, '0')}:${capturedAt.minute.toString().padLeft(2, '0')}'
+        : '';
+    return 'Near $lat, $lng · $timeText';
   }
 
   @override
@@ -101,8 +124,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
+    // Performance: decode the ID photo at its actual on-screen pixel
+    // size (96 logical px * devicePixelRatio) rather than at the
+    // source photo's full resolution — same reasoning as the
+    // dashboard avatar, just a bigger target size here.
+    final photoCachePx = (96 * MediaQuery.of(context).devicePixelRatio).round();
+
     return RefreshIndicator(
-      onRefresh: _loadProfile,
+      onRefresh: () async {
+        await _loadProfile();
+        await _loadLastLoginLocation();
+      },
       child: ListView(
         children: [
           Center(
@@ -112,13 +144,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
               decoration: BoxDecoration(
                 color: AppColors.violetSoft,
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.violet.withOpacity(0.3)),
+                border: Border.all(color: AppColors.violet.withValues(alpha: 0.3)),
               ),
               clipBehavior: Clip.antiAlias,
               child: (_photoUrl != null && _photoUrl!.isNotEmpty)
                   ? Image.network(
                       _photoUrl!,
                       fit: BoxFit.cover,
+                      cacheWidth: photoCachePx,
+                      cacheHeight: photoCachePx,
                       loadingBuilder: (context, child, progress) {
                         if (progress == null) return child;
                         return const Center(
@@ -156,6 +190,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _readOnlyRow(context, 'Admission number', _admissionNo, Icons.confirmation_number_outlined),
           const SizedBox(height: AppSpacing.sm),
           _readOnlyRow(context, 'Course', _course, Icons.school_outlined),
+          const SizedBox(height: AppSpacing.sm),
+          _readOnlyRow(context, 'Last login', _formatLastLogin(), Icons.login_outlined),
 
           const SizedBox(height: AppSpacing.lg),
           Container(
@@ -164,15 +200,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
               color: AppColors.violetSoft,
               borderRadius: BorderRadius.circular(AppRadius.md),
             ),
-            child: Row(
+            child: const Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.lock_outline, size: 16, color: AppColors.inkPlum),
-                const SizedBox(width: 8),
+                Icon(Icons.lock_outline, size: 16, color: AppColors.inkPlum),
+                SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'These details are set by the school and can\'t be edited here. To update your registered course, use Course registration.',
-                    style: const TextStyle(fontSize: 12, color: AppColors.inkPlum, height: 1.4),
+                    style: TextStyle(fontSize: 12, color: AppColors.inkPlum, height: 1.4),
                   ),
                 ),
               ],
