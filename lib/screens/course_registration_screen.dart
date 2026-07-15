@@ -16,7 +16,6 @@ class _CourseRegistrationScreenState extends State<CourseRegistrationScreen> {
   final TextEditingController _semesterController = TextEditingController();
   final TextEditingController _unitController = TextEditingController();
   final List<String> _units = [];
-  String? _currentCourse;
 
   @override
   void initState() {
@@ -26,10 +25,9 @@ class _CourseRegistrationScreenState extends State<CourseRegistrationScreen> {
 
   Future<void> _loadCurrentCourse() async {
     final course = await CourseRegistrationStore.getCurrentCourse();
-    if (mounted) {
+    if (mounted && course != null) {
       setState(() {
-        _currentCourse = course;
-        if (course != null) _courseController.text = course;
+        _courseController.text = course;
       });
     }
   }
@@ -65,7 +63,6 @@ class _CourseRegistrationScreenState extends State<CourseRegistrationScreen> {
     await CourseRegistrationStore.setCurrentCourse(course);
     if (!mounted) return;
 
-    setState(() => _currentCourse = course);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Registered ${_units.length} unit(s) for ${_semesterController.text}')),
     );

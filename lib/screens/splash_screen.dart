@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'login_screen.dart';
@@ -13,6 +14,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   late final AnimationController _controller;
   late final Animation<double> _fade;
   late final Animation<double> _scale;
+
+  // Kept as a field (instead of a bare Future.delayed) specifically
+  // so it can be cancelled in dispose(). A raw Future.delayed can't
+  // be cancelled — if the widget is torn down before it fires (e.g.
+  // during a widget test, or if the user backs out fast), it keeps
+  // running in the background and trips Flutter's "pending timer
+  // after dispose" check.
+  Timer? _navigationTimer;
 
   @override
   void initState() {
@@ -30,8 +39,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     _controller.forward();
 
-    // Hold on the splash for ~2.5s total, then fade into Login.
-    Future.delayed(const Duration(milliseconds: 2500), () {
+    _navigationTimer = Timer(const Duration(milliseconds: 2500), () {
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
@@ -47,6 +55,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   void dispose() {
+    _navigationTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -70,9 +79,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     width: 96,
                     height: 96,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: Colors.white.withOpacity(0.4), width: 2),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.4), width: 2),
                     ),
                     child: const Icon(
                       Icons.school_rounded,
@@ -94,7 +103,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   Text(
                     'Everything school, in one place',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.75),
+                      color: Colors.white.withValues(alpha: 0.75),
                       fontSize: 13,
                     ),
                   ),
@@ -104,14 +113,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     height: 22,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.4,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white.withOpacity(0.85)),
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white.withValues(alpha: 0.85)),
                     ),
                   ),
                   const SizedBox(height: 12),
                   Text(
                     'Loading your portal...',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 12,
                     ),
                   ),
