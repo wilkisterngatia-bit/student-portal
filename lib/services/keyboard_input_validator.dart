@@ -72,12 +72,19 @@ class KeyboardInputValidator {
 
   /// Basic structural email check — not exhaustive RFC validation,
   /// but enough to catch obviously malformed input.
+  ///
+  /// FIX (Week 12 debugging exercise): the original pattern only
+  /// allowed a single dot after the "@" (e.g. "student@mku.ke"),
+  /// which incorrectly rejected real multi-label domains like
+  /// "student@mku.ac.ke". The domain group is now repeatable —
+  /// `([\w\-]+\.)+` — so any number of dot-separated labels before
+  /// the final suffix are accepted.
   static ValidationResult validateEmail(String value, {String fieldName = 'Email'}) {
     final trimmed = value.trim();
     if (trimmed.isEmpty) {
       return ValidationResult.invalid('$fieldName is required.');
     }
-    final pattern = RegExp(r'^[\w\.\-]+@[\w\-]+\.[a-zA-Z]{2,}$');
+    final pattern = RegExp(r'^[\w\.\-]+@([\w\-]+\.)+[a-zA-Z]{2,}$');
     if (!pattern.hasMatch(trimmed)) {
       return ValidationResult.invalid('Enter a valid $fieldName.');
     }
