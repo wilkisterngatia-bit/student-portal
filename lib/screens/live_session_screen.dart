@@ -134,7 +134,7 @@ class _LiveSessionScreenState extends State<LiveSessionScreen> {
             const Text('LIVE', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, letterSpacing: 1)),
             const Spacer(),
             Text('${widget.day} · ${widget.time}',
-                style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)),
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12)),
           ],
         ),
         const Spacer(),
@@ -152,7 +152,7 @@ class _LiveSessionScreenState extends State<LiveSessionScreen> {
                     color: Colors.white, fontSize: 56, fontWeight: FontWeight.w700, letterSpacing: 1),
               ),
               const SizedBox(height: 8),
-              Text('Time in lesson', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13)),
+              Text('Time in lesson', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13)),
             ],
           ),
         ),
@@ -182,7 +182,7 @@ class _LiveSessionScreenState extends State<LiveSessionScreen> {
         Text(
           'You were in ${widget.unit} for ${_formatDuration(_seconds)}.',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 13),
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13),
         ),
         const SizedBox(height: AppSpacing.xl),
         SizedBox(
@@ -190,7 +190,7 @@ class _LiveSessionScreenState extends State<LiveSessionScreen> {
           child: OutlinedButton(
             style: OutlinedButton.styleFrom(
               foregroundColor: Colors.white,
-              side: BorderSide(color: Colors.white.withOpacity(0.3)),
+              side: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
             ),
             onPressed: () => Navigator.pop(context),
             child: const Text('Done'),
@@ -218,7 +218,7 @@ class _LiveSessionScreenState extends State<LiveSessionScreen> {
           const SizedBox(height: 8),
           Text(subtitle,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white.withOpacity(0.65), fontSize: 13)),
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.65), fontSize: 13)),
           if (showSpinner) ...[
             const SizedBox(height: AppSpacing.lg),
             const SizedBox(

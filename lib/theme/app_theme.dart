@@ -128,7 +128,7 @@ ThemeData buildAppTheme() {
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.violet,
         foregroundColor: Colors.white,
-        disabledBackgroundColor: AppColors.violet.withOpacity(0.4),
+        disabledBackgroundColor: AppColors.violet.withValues(alpha: 0.4),
         elevation: 0,
         minimumSize: const Size.fromHeight(54),
         shape: RoundedRectangleBorder(

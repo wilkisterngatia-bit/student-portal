@@ -12,3 +12,7 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+storePassword=@NOELLE11607
+keyPassword=@NOELLE11607
+keyAlias=student_portal
+storeFile=C:\\Users\\Wilkester\\student_portal_key.jks

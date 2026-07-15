@@ -115,7 +115,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Overall attendance',
-                    style: TextStyle(color: Colors.white.withOpacity(0.75), fontSize: 13)),
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 13)),
                 const SizedBox(height: 6),
                 Text('$overallPercent%',
                     style: const TextStyle(
@@ -123,7 +123,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 const SizedBox(height: 4),
                 Text(
                   '${record.totalAttended} of ${record.totalSessions} sessions attended',
-                  style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 13),
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13),
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 StatusPill(
@@ -160,7 +160,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   drawVerticalLine: false,
                   horizontalInterval: 25,
                   getDrawingHorizontalLine: (value) =>
-                      FlLine(color: AppColors.divider, strokeWidth: 1),
+                      const FlLine(color: AppColors.divider, strokeWidth: 1),
                 ),
                 borderData: FlBorderData(show: false),
                 titlesData: FlTitlesData(

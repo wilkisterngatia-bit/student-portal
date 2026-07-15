@@ -100,7 +100,7 @@ class _FloatingAssistantState extends State<FloatingAssistant> {
                   borderRadius: BorderRadius.circular(AppRadius.lg),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.inkPlumDark.withOpacity(0.25),
+                      color: AppColors.inkPlumDark.withValues(alpha: 0.25),
                       blurRadius: 24,
                       offset: const Offset(0, 8),
                     ),
@@ -118,7 +118,7 @@ class _FloatingAssistantState extends State<FloatingAssistant> {
                             width: 32,
                             height: 32,
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
+                              color: Colors.white.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             alignment: Alignment.center,
@@ -217,7 +217,7 @@ class _FloatingAssistantState extends State<FloatingAssistant> {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.inkPlumDark.withOpacity(0.3),
+                      color: AppColors.inkPlumDark.withValues(alpha: 0.3),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),

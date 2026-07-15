@@ -119,7 +119,7 @@ class _FeesScreenState extends State<FeesScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Outstanding balance',
-                  style: TextStyle(color: Colors.white.withOpacity(0.75), fontSize: 13)),
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 13)),
               const SizedBox(height: 6),
               Text(_fmt(_balance),
                   style: const TextStyle(
@@ -153,7 +153,7 @@ class _FeesScreenState extends State<FeesScreen> {
     }
     final proportionPaid = _totalBilled > 0 ? _amountPaid / _totalBilled : 0;
     if (proportionPaid < 0.5) {
-      return AiInsightCard(
+      return const AiInsightCard(
         tone: InsightTone.warning,
         message:
             'You\'ve paid less than half of this semester\'s fees. Clearing your balance before exams helps avoid delays accessing your results.',

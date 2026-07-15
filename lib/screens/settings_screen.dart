@@ -38,9 +38,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _handleSignOut() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('is_logged_in', false);
-    AuthState.isLoggedIn.value = false;
+    // Centralized in AuthState.logout() rather than flipping the
+    // ValueNotifier and SharedPreferences flag directly here.
+    await AuthState.logout();
     if (!mounted) return;
     Navigator.pushAndRemoveUntil(
       context,
@@ -97,7 +97,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: AppSpacing.lg),
             Text('About', style: Theme.of(context).textTheme.labelSmall),
             const SizedBox(height: AppSpacing.sm),
-            _infoTile(Icons.info_outline, 'App version', '1.0.0'),
+            _infoTile(Icons.info_outline, 'App version', '1.1.0'),
             const SizedBox(height: AppSpacing.sm),
             _infoTile(Icons.school_outlined, 'Portal', 'Student Portal'),
 
@@ -155,7 +155,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: AppColors.violet,
+            activeThumbColor: AppColors.violet,
           ),
         ],
       ),

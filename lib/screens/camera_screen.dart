@@ -111,7 +111,7 @@ class _CameraScreenState extends State<CameraScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: AppSpacing.lg),
-        Text('Captured photo', style: TextStyle(
+        const Text('Captured photo', style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
@@ -231,7 +231,7 @@ class _CameraScreenState extends State<CameraScreen> {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
+                        color: Colors.white.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(AppRadius.sm),
                       ),
                       alignment: Alignment.center,
@@ -369,7 +369,7 @@ class _CameraScreenState extends State<CameraScreen> {
           Container(
             width: 20,
             height: 20,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.inkPlum,
               shape: BoxShape.circle,
             ),
